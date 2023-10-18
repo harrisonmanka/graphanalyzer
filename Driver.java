@@ -12,7 +12,7 @@ public class Driver {
             GraphAnalyzer graph = new GraphAnalyzer(args[0]);
             graph.go();
         }
-        catch(FileNotFoundException e){
+        catch(Error e){
             System.out.println(e.getMessage());
         }
     }

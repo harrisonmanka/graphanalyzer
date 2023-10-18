@@ -1,28 +1,68 @@
+import java.io.File;
 import java.io.FileNotFoundException;
+import java.util.ArrayList;
 import java.util.LinkedList;
-import java.util.List;
+import java.util.Scanner;
 
 public class GraphAnalyzer<E> {
 
-    private List<LinkedList<Vertex<E>>> adjList;
+    private ArrayList<LinkedList<Vertex<E>>> adjList;
     private boolean[][] adjMatrix;
     private boolean cycle;
     private String file;
+    private int count;
 
     public GraphAnalyzer(String file){
         this.file = file;
-        this.adjList = null;
+        this.adjList = new ArrayList<LinkedList<Vertex<E>>>();
         this.adjMatrix = null;
         this.cycle = false;
+        this.count = 0;
     }
 
     public void buildList(){
         try{
+            File file = new File(this.file);
+            Scanner scanner = new Scanner(file);
+            while(scanner.hasNext()){
+                String source = scanner.next();
+                String dest = scanner.next();
+                if(!check(source)){ //checking if source is in the arraylist
+                    adjList.add(new LinkedList<Vertex<E>>());
+                    Vertex<E> newVertex = new Vertex<>((E)source, count, "UNVISITED");
+                    Vertex<E> newVertex2 = new Vertex<>((E)dest, count+1, "UNVISITED");
+                    adjList.get(count).add(newVertex);
+                    adjList.get(count).add(newVertex2);
 
+                }
+                else{
+
+                }
+            }
         }
-        catch(Error e){
+        catch(Error | FileNotFoundException e){
             System.out.println(e.getMessage());
         }
+    }
+
+    public int findIndex(String s){
+        int index = -1;
+        for(int i = 0; i < adjList.size(); i++){
+            if(adjList.get(i).getFirst().getId().equals(s)){
+                index = i;
+            }
+        }
+        return index;
+    }
+
+    public boolean check(String s){
+        boolean equal = false;
+        for(int i = 0; i < adjList.size(); i++){
+            if(adjList.get(i).getFirst().getId().equals(s)){
+                equal = true;
+            }
+        }
+        return equal;
     }
 
     public void promptMenu(){
