@@ -10,6 +10,12 @@ public class Vertex<E>{
         this.index = 0;
     }
 
+    public Vertex(E id, String state){
+        this.id = id;
+        this.state = state;
+        this.index = -1;
+    }
+
     public Vertex(E id, int index, String state){
         this.id = id;
         this.index = index;
@@ -30,5 +36,13 @@ public class Vertex<E>{
 
     public void setState(String state) {
         this.state = state;
+    }
+
+    public int getIndex() {
+        return index;
+    }
+
+    public void setIndex(int index) {
+        this.index = index;
     }
 }

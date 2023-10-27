@@ -11,6 +11,8 @@ public class GraphAnalyzer<E> {
     private boolean cycle;
     private String file;
     private int count;
+    private ArrayList<Vertex<E>> bfsResults;
+    private ArrayList<Vertex<E>> dfsResults;
 
     public GraphAnalyzer(String file){
         this.file = file;
@@ -30,18 +32,30 @@ public class GraphAnalyzer<E> {
                 if(!check(source)){ //checking if source is in the arraylist
                     adjList.add(new LinkedList<Vertex<E>>());
                     Vertex<E> newVertex = new Vertex<>((E)source, count, "UNVISITED");
-                    Vertex<E> newVertex2 = new Vertex<>((E)dest, count+1, "UNVISITED");
+                    Vertex<E> newVertex2 = new Vertex<>((E)dest, "UNVISITED");
                     adjList.get(count).add(newVertex);
                     adjList.get(count).add(newVertex2);
-
+                    count++;
                 }
                 else{
-
+                    Vertex<E> newVertex = new Vertex<>((E)dest, "UNVISITED");
+                    int listIndex = findIndex(source);
+                    adjList.get(listIndex).add(newVertex);
                 }
             }
         }
         catch(Error | FileNotFoundException e){
             System.out.println(e.getMessage());
+        }
+        printVertices();
+    }
+
+    public void printVertices(){
+        for(int i = 0; i < adjList.size(); i++){
+            for(int j = 0; j < adjList.get(i).size(); j++){
+                System.out.print(adjList.get(i).get(j).getId() + " ");
+            }
+            System.out.println();
         }
     }
 
