@@ -7,7 +7,7 @@ import java.util.Scanner;
 public class GraphAnalyzer<E> {
 
     private ArrayList<LinkedList<Vertex<E>>> adjList;
-    private boolean[][] adjMatrix;
+    private int[][] adjMatrix;
     private boolean cycle;
     private String file;
     private int count;
@@ -36,6 +36,12 @@ public class GraphAnalyzer<E> {
                     adjList.get(count).add(newVertex);
                     adjList.get(count).add(newVertex2);
                     count++;
+                    if(!check(dest)){
+                        adjList.add(new LinkedList<Vertex<E>>());
+                        Vertex<E> newVertex22 = new Vertex<>((E)dest, "UNVISITED");
+                        adjList.get(count).add(newVertex22);
+                        count++;
+                    }
                 }
                 else{
                     Vertex<E> newVertex = new Vertex<>((E)dest, "UNVISITED");
@@ -49,7 +55,14 @@ public class GraphAnalyzer<E> {
         }
         adjustIndexInList();
         printVertices();
-        //buildMatrix();
+        sortAdjList();
+        buildMatrix();
+        System.out.println();
+        //printMatrix();
+    }
+
+    public void sortAdjList(){
+
     }
 
     public void adjustIndexInList(){
@@ -64,7 +77,29 @@ public class GraphAnalyzer<E> {
     }
 
     public void buildMatrix(){
-        adjMatrix = new boolean[count][count];
+        adjMatrix = new int[count][count];
+        for(int i = 0; i < count; i++){
+            for(int j = 0; j < adjList.get(i).size(); j++){
+                if(i == j){
+                    adjMatrix[i][j] = 0;
+                }
+                else if(adjList.get(i).contains(adjList.get(i).get(j))){
+                    adjMatrix[i][j] = 1;
+                }
+                else{
+                    adjMatrix[i][j] = 0;
+                }
+            }
+        }
+    }
+
+    public void printMatrix(){
+        for(int i = 0; i < adjMatrix.length; i++){
+            for(int j = 0; j < adjMatrix.length; j++){
+                System.out.print(adjMatrix[i][j] + " ");
+            }
+            System.out.println();
+        }
     }
 
     public void printVertices(){
