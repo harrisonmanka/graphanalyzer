@@ -47,13 +47,35 @@ public class GraphAnalyzer<E> {
         catch(Error | FileNotFoundException e){
             System.out.println(e.getMessage());
         }
+        adjustIndexInList();
         printVertices();
+        //buildMatrix();
+    }
+
+    public void adjustIndexInList(){
+        for(int i = 0; i < adjList.size(); i++){
+            for(int j = 0; j < adjList.get(i).size(); j++){
+                if(adjList.get(i).get(j).getIndex() == -1){
+                    int index = findIndex(adjList.get(i).get(j).getId().toString());
+                    adjList.get(i).get(j).setIndex(index);
+                }
+            }
+        }
+    }
+
+    public void buildMatrix(){
+        adjMatrix = new boolean[count][count];
     }
 
     public void printVertices(){
         for(int i = 0; i < adjList.size(); i++){
             for(int j = 0; j < adjList.get(i).size(); j++){
-                System.out.print(adjList.get(i).get(j).getId() + " ");
+                if(j == 0){
+                    System.out.print(adjList.get(i).get(j).getId() + ": ");
+                }
+                else{
+                    System.out.print(adjList.get(i).get(j).getId() + "(" + adjList.get(i).get(j).getIndex() + ") ");
+                }
             }
             System.out.println();
         }
