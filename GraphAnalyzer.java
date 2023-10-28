@@ -7,7 +7,7 @@ import java.util.Scanner;
 public class GraphAnalyzer<E> {
 
     private ArrayList<LinkedList<Vertex<E>>> adjList;
-    private int[][] adjMatrix;
+    private boolean[][] adjMatrix;
     private boolean cycle;
     private String file;
     private int count;
@@ -58,7 +58,7 @@ public class GraphAnalyzer<E> {
         sortAdjList();
         buildMatrix();
         System.out.println();
-        //printMatrix();
+        printMatrix();
     }
 
     public void sortAdjList(){
@@ -77,24 +77,44 @@ public class GraphAnalyzer<E> {
     }
 
     public void buildMatrix(){
-        adjMatrix = new int[count][count];
+        adjMatrix = new boolean[count][count];
         for(int i = 0; i < count; i++){
             for(int j = 0; j < adjList.get(i).size(); j++){
-                if(i == j){
-                    adjMatrix[i][j] = 0;
+                Vertex<E> src = adjList.get(i).get(j);
+                boolean error = (src.getId().equals(i));
+                if(i == j || error){
+                    adjMatrix[i][j] = false;
                 }
-                else if(adjList.get(i).contains(adjList.get(i).get(j))){
-                    adjMatrix[i][j] = 1;
+                else if(hasVertex(adjList.get(i), src)){
+                    adjMatrix[i][src.getIndex()] = true;
                 }
                 else{
-                    adjMatrix[i][j] = 0;
+                    adjMatrix[i][j] = false;
                 }
             }
         }
     }
 
+    public boolean hasVertex(LinkedList<Vertex<E>> list, Vertex<E> vertex){
+        boolean check = false;
+        for(Vertex<E> e : list){
+            if(e.getId().equals(vertex.getId())){
+                check = true;
+            }
+        }
+        return check;
+    }
+
     public void printMatrix(){
+        for(int i = 0; i < adjList.size(); i++){
+            if(i == 0){
+                System.out.print("\t");
+            }
+            System.out.print(adjList.get(i).getFirst().getId().toString() + "     ");
+        }
+        System.out.println();
         for(int i = 0; i < adjMatrix.length; i++){
+            System.out.print(adjList.get(i).getFirst().getId().toString() + " ");
             for(int j = 0; j < adjMatrix.length; j++){
                 System.out.print(adjMatrix[i][j] + " ");
             }
