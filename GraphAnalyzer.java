@@ -55,14 +55,9 @@ public class GraphAnalyzer<E> {
         }
         adjustIndexInList();
         printVertices();
-        sortAdjList();
         buildMatrix();
         System.out.println();
         printMatrix();
-    }
-
-    public void sortAdjList(){
-
     }
 
     public void adjustIndexInList(){
@@ -79,10 +74,10 @@ public class GraphAnalyzer<E> {
     public void buildMatrix(){
         adjMatrix = new boolean[count][count];
         for(int i = 0; i < count; i++){
-            for(int j = 0; j < adjList.get(i).size(); j++){
+            for(int j = 1; j < adjList.get(i).size(); j++){
                 Vertex<E> src = adjList.get(i).get(j);
-                boolean error = (src.getId().equals(i));
-                if(i == j || error){
+                int checkColumn = adjList.get(i).get(j).getIndex();
+                if(i == checkColumn){
                     adjMatrix[i][j] = false;
                 }
                 else if(hasVertex(adjList.get(i), src)){
