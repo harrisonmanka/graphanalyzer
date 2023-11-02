@@ -9,7 +9,7 @@ public class Driver {
             System.exit(1);
         }
         try{
-            GraphAnalyzer graph = new GraphAnalyzer(args[0]);
+            GraphAnalyzer<?> graph = new GraphAnalyzer<>(args[0]);
             graph.go();
         }
         catch(Error e){

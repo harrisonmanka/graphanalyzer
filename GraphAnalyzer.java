@@ -1,8 +1,6 @@
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.Scanner;
+import java.util.*;
 
 public class GraphAnalyzer<E> {
 
@@ -13,13 +11,16 @@ public class GraphAnalyzer<E> {
     private int count;
     private ArrayList<Vertex<E>> bfsResults;
     private ArrayList<Vertex<E>> dfsResults;
+    private Map<String, Boolean> menuOptions;
 
     public GraphAnalyzer(String file){
         this.file = file;
         this.adjList = new ArrayList<LinkedList<Vertex<E>>>();
         this.adjMatrix = null;
+        this.menuOptions = new HashMap<>();
         this.cycle = false;
         this.count = 0;
+
     }
 
     public void buildList(){
@@ -54,10 +55,13 @@ public class GraphAnalyzer<E> {
             System.out.println(e.getMessage());
         }
         adjustIndexInList();
-        printVertices();
+//        printVertices();
         buildMatrix();
-        System.out.println();
-        printMatrix();
+//        System.out.println();
+//        printMatrix();
+//        boolean result = findSource("3");
+//        System.out.println(result);
+        initializeMenuValues();
     }
 
     public void adjustIndexInList(){
@@ -88,6 +92,52 @@ public class GraphAnalyzer<E> {
                 }
             }
         }
+    }
+
+    public boolean findSource(String s) throws IllegalArgumentException{
+        boolean result = false;
+        for(int i = 0; i < adjList.size(); i++){
+            Vertex<E> test = adjList.get(i).getFirst();
+            if(test.getId().equals(s) && adjList.get(i).size() > 1){
+                result = true;
+            }
+        }
+        if(!result){
+            throw new IllegalArgumentException();
+        }
+        return result;
+    }
+
+    public boolean findDestination(String s) throws IllegalArgumentException{
+        boolean result = false;
+        for(int i = 0; i < adjList.size(); i++){
+            for(int j = 1; j < adjList.get(i).size(); j++){
+                Vertex<E> test = adjList.get(i).get(j);
+                if(test.getId().equals(s)){
+                    result = true;
+                }
+            }
+        }
+        if(!result){
+            throw new IllegalArgumentException();
+        }
+        return result;
+    }
+
+    public ArrayList<Vertex<E>> breadthFirstSearch(String source){
+        return null;
+    }
+
+    public ArrayList<Vertex<E>> depthFirstSearch(String source, String destination){
+        return null;
+    }
+
+    public boolean getCycleStatus(){
+        return cycle;
+    }
+
+    public void transitiveClosure(){
+
     }
 
     public boolean hasVertex(LinkedList<Vertex<E>> list, Vertex<E> vertex){
@@ -151,6 +201,22 @@ public class GraphAnalyzer<E> {
         return equal;
     }
 
+    public void initializeMenuValues(){ //set all menu selections to false
+        menuOptions.put("1", false);
+        menuOptions.put("2", false);
+        menuOptions.put("3", false);
+        menuOptions.put("4", false);
+        menuOptions.put("5", false);
+    }
+
+    public void replaceAllOptions(){ // set all menu selections to true
+        menuOptions.replace("1", true);
+        menuOptions.replace("2", true);
+        menuOptions.replace("3", true);
+        menuOptions.replace("4", true);
+        menuOptions.replace("5", true);
+    }
+
     public void promptMenu(){
         String result = "";
         result += "1) Depth First Search Path Discovery\n" +
@@ -162,9 +228,117 @@ public class GraphAnalyzer<E> {
         System.out.println(result);
     }
 
+    public void prompt(){
+        promptMenu();
+        Scanner scanner = new Scanner(System.in);
+        boolean inProgress = true;
+        System.out.print("Enter menu choice >>> ");
+        String choice = scanner.next();
+        System.out.println();
+        while(inProgress){
+            switch(choice){
+                case "0":
+                    inProgress = false;
+                    System.out.println("Goodbye!!!");
+                    break;
+                case "1":
+                    System.out.print("Please enter a valid source vertex >>> ");
+                    String src = scanner.next();
+                    System.out.println();
+                    System.out.print("Please enter a valid destination vertex >>> ");
+                    String dest = scanner.next();
+                    System.out.println();
+                    if(findSource(src) && findDestination(dest)){
+                        depthFirstSearch(src, dest);
+                        menuOptions.replace("1", true);
+                    }
+                    else{
+                        System.out.println("Invalid source and/or destination vertex. Try again.");
+                    }
+                    break;
+                case "2":
+                    System.out.print("Please enter a valid source vertex >>> ");
+                    String src2 = scanner.next();
+                    System.out.println();
+                    System.out.print("Please enter a valid destination vertex >>> ");
+                    String dest2 = scanner.next();
+                    System.out.println();
+                    if(findSource(src2) && findDestination(dest2)){
+                        depthFirstSearch(src2, dest2);
+                        menuOptions.replace("2", true);
+                    }
+                    else{
+                        System.out.println("Invalid source and/or destination vertex. Try again.");
+                    }
+                    break;
+                case "3":
+                    //checkForCycles();
+                    menuOptions.replace("3", true);
+                    break;
+                case "4":
+                    System.out.print("Please enter a valid source vertex >>> ");
+                    String src3 = scanner.next();
+                    System.out.println();
+                    if(findSource(src3)){
+                        breadthFirstSearch(src3);
+                        menuOptions.replace("4", true);
+                    }
+                    else{
+                        System.out.println("Invalid source vertex. Try again.");
+                    }
+                    break;
+                case "5":
+                    transitiveClosure();
+                    menuOptions.replace("5", true);
+                    break;
+                case "6":
+                    System.out.print("Please enter a valid source vertex >>> ");
+                    String src4 = scanner.next();
+                    System.out.println();
+                    System.out.print("Please enter a valid destination vertex >>> ");
+                    String dest4 = scanner.next();
+                    System.out.println();
+                    if(findSource(src4) && findDestination(dest4)){
+                        depthFirstSearch(src4, dest4);
+                        breadthFirstSearch(src4);
+                        transitiveClosure();
+                        replaceAllOptions();
+                    }
+                    break;
+                case "7":
+                    for(int i = 1; i <= menuOptions.size(); i++){
+                        String index = Integer.toString(i);
+                        if(menuOptions.get(index)){ //checking which options the user selection
+                            switch(index){
+                                case "1":
+                                    //printDFS();
+                                case "2":
+                                    //printDFSWithCycles();
+                                case "3":
+                                    // print cycle detection
+                                case "4":
+                                    //printBFS();
+                                case "5":
+                                    //printNewEdges();
+                            }
+                        }
+                    }
+                    break;
+                case "8":
+                    System.out.print("Please enter a new filename >>> ");
+                    String file = scanner.next();
+                    GraphAnalyzer<E> graph = new GraphAnalyzer<E>(file);
+                    graph.buildList();
+                    break;
+            }
+            prompt();
+        }
+
+    }
+
     public void go(){
         System.out.println("Welcome to GraphAnalyzermeister 2023 >>");
         buildList();
-        //prompt();
+        prompt();
     }
 }
