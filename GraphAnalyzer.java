@@ -1,5 +1,7 @@
+import java.beans.VetoableChangeListener;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.lang.reflect.Array;
 import java.util.*;
 
 public class GraphAnalyzer<E> {
@@ -9,8 +11,8 @@ public class GraphAnalyzer<E> {
     private boolean cycle;
     private String file;
     private int count;
-    private ArrayList<Vertex<E>> bfsResults;
-    private ArrayList<Vertex<E>> dfsResults;
+//    private ArrayList<Vertex<E>> bfsResults;
+//    private ArrayList<Vertex<E>> dfsResults;
     private Map<String, Boolean> menuOptions;
 
     public GraphAnalyzer(String file){
@@ -125,7 +127,15 @@ public class GraphAnalyzer<E> {
     }
 
     public ArrayList<Vertex<E>> breadthFirstSearch(String source){
-        return null;
+        ArrayList<Vertex<E>> bfsResults = new ArrayList<>();
+        Queue<Vertex<E>> queue = new ArrayDeque<>();
+        Vertex<E> first = getVertexByID(source);
+        bfsResults.add(first);
+        first.setState("VISITED");
+        while(queue.isEmpty()){
+            getAllNeighbors(queue.poll());
+        }
+
     }
 
     public ArrayList<Vertex<E>> depthFirstSearch(String source, String destination){
@@ -148,6 +158,20 @@ public class GraphAnalyzer<E> {
             }
         }
         return check;
+    }
+
+    public ArrayList<Vertex<E>> getAllNeighbors(Vertex<E> vertex){
+        ArrayList<Vertex<E>> list = new ArrayList<>();
+        for(int i = 0; i < adjList.size(); i++){
+            if(adjList.get(i).getFirst().getId().equals(vertex.getId())){
+                if(adjList.get(i).size() > 1){
+                    for(int j = 1; j < adjList.get(i).size(); i++){
+                        list.add(adjList.get(i).get(j));
+                    }
+                }
+            }
+        }
+        return list;
     }
 
     public void printMatrix(){
@@ -179,6 +203,16 @@ public class GraphAnalyzer<E> {
             }
             System.out.println();
         }
+    }
+
+    public Vertex<E> getVertexByID(String s){
+        Vertex<E> toFind = null;
+        for(int i = 0; i < adjList.size(); i++){
+            if(adjList.get(i).getFirst().getId().equals(s)){
+                toFind = adjList.get(i).getFirst();
+            }
+        }
+        return toFind;
     }
 
     public int findIndex(String s){
