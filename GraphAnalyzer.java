@@ -66,11 +66,10 @@ public class GraphAnalyzer<E> {
 //        printVertices();
         buildMatrix();
 //        System.out.println();
-//        printMatrix();
+        printMatrix();
 //        boolean result = findSource("3");
 //        System.out.println(result);
         initializeMenuValues();
-        size = count;
     }
 
     public void adjustIndexInList(){
@@ -101,6 +100,7 @@ public class GraphAnalyzer<E> {
                 }
             }
         }
+        size = adjMatrix.length;
     }
 
     public boolean findSource(String s) throws IllegalArgumentException{
@@ -171,6 +171,7 @@ public class GraphAnalyzer<E> {
                 }
             }
         }
+        //printMatrix();
     }
 
     public void printMatrix(){
@@ -186,8 +187,9 @@ public class GraphAnalyzer<E> {
             for(int j = 0; j < adjMatrix.length; j++){
                 System.out.print(adjMatrix[i][j] + " ");
             }
-            System.out.println();
+            System.out.println("");
         }
+        System.out.println();
     }
 
     public boolean hasVertex(LinkedList<Vertex<E>> list, Vertex<E> vertex){
