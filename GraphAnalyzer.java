@@ -11,17 +11,23 @@ public class GraphAnalyzer<E> {
     private boolean cycle;
     private String file;
     private int count;
-//    private ArrayList<Vertex<E>> bfsResults;
-//    private ArrayList<Vertex<E>> dfsResults;
+    private int size;
+    private ArrayList<Vertex<E>> bfsResults;
+    private ArrayList<Vertex<E>> dfsResults;
     private Map<String, Boolean> menuOptions;
+    private ArrayList<String> newEdges;
 
     public GraphAnalyzer(String file){
         this.file = file;
         this.adjList = new ArrayList<LinkedList<Vertex<E>>>();
         this.adjMatrix = null;
+        this.bfsResults = new ArrayList<>();
+        this.dfsResults = new ArrayList<>();
+        this.newEdges = new ArrayList<>();
         this.menuOptions = new HashMap<>();
         this.cycle = false;
         this.count = 0;
+        this.size = 0;
 
     }
 
@@ -64,6 +70,7 @@ public class GraphAnalyzer<E> {
 //        boolean result = findSource("3");
 //        System.out.println(result);
         initializeMenuValues();
+        size = count;
     }
 
     public void adjustIndexInList(){
@@ -126,20 +133,25 @@ public class GraphAnalyzer<E> {
         return result;
     }
 
-    public ArrayList<Vertex<E>> breadthFirstSearch(String source){
-        ArrayList<Vertex<E>> bfsResults = new ArrayList<>();
+    public void breadthFirstSearch(String source){
         Queue<Vertex<E>> queue = new ArrayDeque<>();
         Vertex<E> first = getVertexByID(source);
-        bfsResults.add(first);
-        first.setState("VISITED");
-        while(queue.isEmpty()){
-            getAllNeighbors(queue.poll());
+        queue.add(first);
+        while(!queue.isEmpty()){
+            Vertex<E> vertexToRemove = queue.poll();
+            vertexToRemove.setState("VISITED"); //change state
+            bfsResults.add(vertexToRemove); //add to results
+            ArrayList<Vertex<E>> toAdd = getAllNeighbors(vertexToRemove);
+            for(Vertex<E> v : toAdd){ //vertices in process
+                v.setState("PROCESSING");
+            }
+            queue.addAll(toAdd);
         }
-
+        printBFS();
     }
 
-    public ArrayList<Vertex<E>> depthFirstSearch(String source, String destination){
-        return null;
+    public void depthFirstSearch(String source, String destination){
+
     }
 
     public boolean getCycleStatus(){
@@ -147,31 +159,18 @@ public class GraphAnalyzer<E> {
     }
 
     public void transitiveClosure(){
-
-    }
-
-    public boolean hasVertex(LinkedList<Vertex<E>> list, Vertex<E> vertex){
-        boolean check = false;
-        for(Vertex<E> e : list){
-            if(e.getId().equals(vertex.getId())){
-                check = true;
-            }
-        }
-        return check;
-    }
-
-    public ArrayList<Vertex<E>> getAllNeighbors(Vertex<E> vertex){
-        ArrayList<Vertex<E>> list = new ArrayList<>();
-        for(int i = 0; i < adjList.size(); i++){
-            if(adjList.get(i).getFirst().getId().equals(vertex.getId())){
-                if(adjList.get(i).size() > 1){
-                    for(int j = 1; j < adjList.get(i).size(); i++){
-                        list.add(adjList.get(i).get(j));
+        for(int i = 0; i < size; i++){
+            for(int j = 0; j < size; j++){
+                for(int k = 0; k < size; k++){
+                    if(adjMatrix[i][j] && adjMatrix[j][k]){
+                        adjMatrix[i][k] = true;
+                        String s = "" + getVertexByID(Integer.toString(i)) + "--->"
+                                + getVertexByID(Integer.toString(k));
+                        newEdges.add(s);
                     }
                 }
             }
         }
-        return list;
     }
 
     public void printMatrix(){
@@ -191,18 +190,33 @@ public class GraphAnalyzer<E> {
         }
     }
 
-    public void printVertices(){
+    public boolean hasVertex(LinkedList<Vertex<E>> list, Vertex<E> vertex){
+        boolean check = false;
+        for(Vertex<E> e : list){
+            if(e.getId().equals(vertex.getId())){
+                check = true;
+            }
+        }
+        return check;
+    }
+
+    public ArrayList<Vertex<E>> getAllNeighbors(Vertex<E> vertex){
+        ArrayList<Vertex<E>> list = new ArrayList<>();
         for(int i = 0; i < adjList.size(); i++){
-            for(int j = 0; j < adjList.get(i).size(); j++){
-                if(j == 0){
-                    System.out.print(adjList.get(i).get(j).getId() + ": ");
-                }
-                else{
-                    System.out.print(adjList.get(i).get(j).getId() + "(" + adjList.get(i).get(j).getIndex() + ") ");
+            if(adjList.get(i).getFirst().getId().equals(vertex.getId())){ //gets correct Vertex to check neighbors
+                if(adjList.get(i).size() > 1){
+                    for(int j = 1; j < adjList.get(i).size(); j++){
+                        E string = adjList.get(i).get(j).getId();
+                        Vertex<E> toAdd = getVertexByID((String)string);
+                        if(toAdd.getState().equals("UNVISITED") &&
+                                !toAdd.getState().equals("PROCESSING")){
+                            list.add(toAdd);
+                        }
+                    }
                 }
             }
-            System.out.println();
         }
+        return list;
     }
 
     public Vertex<E> getVertexByID(String s){
@@ -251,6 +265,12 @@ public class GraphAnalyzer<E> {
         menuOptions.replace("5", true);
     }
 
+    public void printBFS(){
+        for(Vertex <E> v : bfsResults){
+            System.out.println(v.getId());
+        }
+    }
+
     public void promptMenu(){
         String result = "";
         result += "1) Depth First Search Path Discovery\n" +
@@ -274,6 +294,7 @@ public class GraphAnalyzer<E> {
                 case "0":
                     inProgress = false;
                     System.out.println("Goodbye!!!");
+                    System.exit(1);
                     break;
                 case "1":
                     System.out.print("Please enter a valid source vertex >>> ");
@@ -351,7 +372,7 @@ public class GraphAnalyzer<E> {
                                 case "3":
                                     // print cycle detection
                                 case "4":
-                                    //printBFS();
+                                    printBFS();
                                 case "5":
                                     //printNewEdges();
                             }
