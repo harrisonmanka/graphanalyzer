@@ -165,7 +165,7 @@ public class GraphAnalyzer<E> {
                 for(int k = 0; k < size; k++){
                     if(adjMatrix[i][j] && adjMatrix[j][k]){
                         newMatrix[i][k] = true;
-                        String s = "" + getVertexByID(Integer.toString(i)) + "--->"
+                        String s = "" + getVertexByID(Integer.toString(i)) + "\t"
                                 + getVertexByID(Integer.toString(k));
                         newEdges.add(s);
                     }
