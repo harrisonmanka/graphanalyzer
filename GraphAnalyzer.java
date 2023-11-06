@@ -1,7 +1,5 @@
-import java.beans.VetoableChangeListener;
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.lang.reflect.Array;
 import java.util.*;
 
 public class GraphAnalyzer<E> {
@@ -163,8 +161,8 @@ public class GraphAnalyzer<E> {
         for(int i = 0; i < size; i++){
             for(int j = 0; j < size; j++){
                 for(int k = 0; k < size; k++){
-                    if(adjMatrix[i][j] && adjMatrix[j][k]){
-                        newMatrix[i][k] = true;
+                    if((newMatrix[i][j] && newMatrix[k][i])){
+                        newMatrix[k][j] = true;
                         String s = "" + getVertexByID(Integer.toString(i)) + "\t"
                                 + getVertexByID(Integer.toString(k));
                         newEdges.add(s);
