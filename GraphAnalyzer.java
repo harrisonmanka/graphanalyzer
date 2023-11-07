@@ -211,6 +211,8 @@ public class GraphAnalyzer<E> {
      * @param source - String representing starting vertex.
      */
     public void breadthFirstSearch(String source){
+        bfsResults.clear();
+        resetStates();
         Queue<Vertex<E>> queue = new ArrayDeque<>();
         Vertex<E> first = getVertexByID(source);
         queue.add(first);
@@ -684,8 +686,14 @@ public class GraphAnalyzer<E> {
                                     printDFS();
                                     break;
                                 case "2":
-                                    printDFS();
-                                    printCycleDetection();
+                                    if(menuOptions.get("3")){ //makes sure both results aren't printed
+                                        printDFS();
+                                        break;
+                                    }
+                                    else{
+                                        printDFS();
+                                        printCycleDetection();
+                                    }
                                     break;
                                 case "3":
                                     printCycleDetection();
