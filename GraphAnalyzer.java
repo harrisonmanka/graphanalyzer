@@ -2,20 +2,74 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.*;
 
+/**
+ * Class representing a GraphAnalyzer which has an adjacencyList and an adjacencyMatrix.
+ *
+ * @param <E> - our generic term
+ */
 public class GraphAnalyzer<E> {
 
+    /**
+     * An ArrayList<LinkedList<Vertex<E>>> representing our adjacencyList.
+     */
     private ArrayList<LinkedList<Vertex<E>>> adjList;
+
+    /**
+     * A boolean[][] representing our adjacencyMatrix.
+     */
     private boolean[][] adjMatrix;
+
+    /**
+     * A boolean representing the cycle status.
+     */
     private boolean cycle;
+
+    /**
+     * A string representing our file name.
+     */
     private String file;
+
+    /**
+     * An integer representing the count.
+     */
     private int count;
+
+    /**
+     * An integer representing the size.
+     */
     private int size;
+
+    /**
+     * An ArrayList<Vertex<E>> representing our breadth first search results.
+     */
     private ArrayList<Vertex<E>> bfsResults;
+
+    /**
+     * An ArrayList<Vertex<E>> representing our depth first search results.
+     */
     private ArrayList<Vertex<E>> dfsResults;
+
+    /**
+     * An ArrayList<Vertex<E>> representing our depth first search path.
+     */
     private ArrayList<Vertex<E>> dfsPath;
+
+    /**
+     * A Map<String, Boolean> representing our menu options' state.
+     */
     private Map<String, Boolean> menuOptions;
+
+    /**
+     * An ArrayList<String> representing our newly added edges.
+     */
     private ArrayList<String> newEdges;
 
+    /**
+     * Creates a new GraphAnalyzer with the specified file and sets all fields
+     * to its respected values.
+     *
+     * @param file - String representing the file.
+     */
     public GraphAnalyzer(String file){
         this.file = file;
         this.adjList = new ArrayList<LinkedList<Vertex<E>>>();
@@ -31,6 +85,9 @@ public class GraphAnalyzer<E> {
 
     }
 
+    /**
+     * Method to build our adjacency list based on given input from the file.
+     */
     public void buildList(){
         try{
             File file = new File(this.file);
@@ -67,6 +124,9 @@ public class GraphAnalyzer<E> {
         initializeMenuValues();
     }
 
+    /**
+     * Helper method to initialize all vertices in the adjacencyList.
+     */
     public void adjustIndexInList(){
         for(int i = 0; i < adjList.size(); i++){
             for(int j = 0; j < adjList.get(i).size(); j++){
@@ -78,6 +138,9 @@ public class GraphAnalyzer<E> {
         }
     }
 
+    /**
+     * Method to build our adjacencyMatrix based off of the adjacencyList.
+     */
     public void buildMatrix(){
         adjMatrix = new boolean[count][count];
         for(int i = 0; i < count; i++){
@@ -98,6 +161,13 @@ public class GraphAnalyzer<E> {
         size = adjMatrix.length;
     }
 
+    /**
+     * Helper method to confirm a source is found within the graph.
+     *
+     * @param s - String representing a user given source.
+     * @return true if it is found, false is not.
+     * @throws IllegalArgumentException - if a source is not valid.
+     */
     public boolean findSource(String s) throws IllegalArgumentException{
         boolean result = false;
         for(int i = 0; i < adjList.size(); i++){
@@ -112,6 +182,13 @@ public class GraphAnalyzer<E> {
         return result;
     }
 
+    /**
+     * Helper method to confirm a destination is found within the graph.
+     *
+     * @param s - String representing a user given destination.
+     * @return true if it is found, false is not.
+     * @throws IllegalArgumentException - if a destination is not valid.
+     */
     public boolean findDestination(String s) throws IllegalArgumentException{
         boolean result = false;
         for(int i = 0; i < adjList.size(); i++){
@@ -128,6 +205,11 @@ public class GraphAnalyzer<E> {
         return result;
     }
 
+    /**
+     * Method that implements a Breadth First Search with a given starting vertex string value.
+     *
+     * @param source - String representing starting vertex.
+     */
     public void breadthFirstSearch(String source){
         Queue<Vertex<E>> queue = new ArrayDeque<>();
         Vertex<E> first = getVertexByID(source);
@@ -144,6 +226,13 @@ public class GraphAnalyzer<E> {
         }
     }
 
+    /**
+     * Method that implements a Depth First Search with a given starting and ending
+     * vertex string value.
+     *
+     * @param source - String representing a starting vertex.
+     * @param destination - String representing a destination vertex.
+     */
     public void depthFirstSearch(String source, String destination){
         dfsPath.clear();
         dfsResults.clear();
@@ -180,6 +269,12 @@ public class GraphAnalyzer<E> {
         }
     }
 
+    /**
+     * Method that implements a cycle search and sets the global value cycle
+     * to true if one is found, false if not.
+     *
+     * @param source - String representing a starting vertex.
+     */
     public void cycleSearch(String source){
         Stack<Vertex<E>> stack = new Stack<>();
         ArrayList<Vertex<E>> neighbors;
@@ -200,6 +295,14 @@ public class GraphAnalyzer<E> {
         }
     }
 
+    /**
+     * Helper method to obtain the nextNeighbor if it has not been
+     * visited yet. Sets cycle to true if the next neighbor
+     * has been visited.
+     *
+     * @param list - ArrayList<Vertex<E>> representing a given list of neighbors.
+     * @return the next unvisited neighbor.
+     */
     public Vertex<E> nextNeighbor(ArrayList<Vertex<E>> list){
         Vertex<E> toReturn = null;
         int i = 0;
@@ -216,6 +319,12 @@ public class GraphAnalyzer<E> {
         return toReturn;
     }
 
+    /**
+     * Helper method to obtain all neighbors no matter the state.
+     *
+     * @param vertex - Vertex to obtain all of his neighbors.
+     * @return An ArrayList of all neighbors.
+     */
     public ArrayList<Vertex<E>> getNeighbors(Vertex<E> vertex){
         ArrayList<Vertex<E>> list = new ArrayList<>();
         for(int i = 0; i < adjList.size(); i++){
@@ -232,6 +341,11 @@ public class GraphAnalyzer<E> {
         return list;
     }
 
+    /**
+     * Method that implements transitive closure and keeps track of all
+     * newly added edges. It also checks to make sure an already existing edge
+     * is not contained in the newly added edge list.
+     */
     public void transitiveClosure(){
         boolean[][] newMatrix = copyMatrix();
         for(int i = 0; i < size; i++){
@@ -258,6 +372,12 @@ public class GraphAnalyzer<E> {
         }
     }
 
+    /**
+     * Helper method to copy the original matrix into a new matrix to be used
+     * with transitive closure.
+     *
+     * @return A boolean[][] matrix that is a copy of the original matrix.
+     */
     public boolean[][] copyMatrix(){
         boolean[][] newM = new boolean[size][size];
         for(int i = 0; i < size; i++){
@@ -268,6 +388,14 @@ public class GraphAnalyzer<E> {
         return newM;
     }
 
+    /**
+     * Helper method to return a boolean value true if a list contains a
+     * specific vertex, false if not.
+     *
+     * @param list - A given LinkedList of vertices.
+     * @param vertex - A given vertex to check is contained in the list or not.
+     * @return True if a vertex is contained in the list, false if not.
+     */
     public boolean hasVertex(LinkedList<Vertex<E>> list, Vertex<E> vertex){
         boolean check = false;
         for(Vertex<E> e : list){
@@ -278,6 +406,13 @@ public class GraphAnalyzer<E> {
         return check;
     }
 
+    /**
+     * Helper method to return all unvisited neighbors and ignoring neighbors that
+     * have been either visited or in processing.
+     *
+     * @param vertex - A vertex to obtain all of its neighbors.
+     * @return An ArrayList containing all unvisited neighbors.
+     */
     public ArrayList<Vertex<E>> getAllNeighbors(Vertex<E> vertex){
         ArrayList<Vertex<E>> list = new ArrayList<>();
         for(int i = 0; i < adjList.size(); i++){
@@ -297,6 +432,12 @@ public class GraphAnalyzer<E> {
         return list;
     }
 
+    /**
+     * Helper method to get a Vertex by a given string representing the id.
+     *
+     * @param s - Given string representing an id.
+     * @return The vertex in which the id represents.
+     */
     public Vertex<E> getVertexByID(String s){
         Vertex<E> toFind = null;
         for(int i = 0; i < adjList.size(); i++){
@@ -307,6 +448,13 @@ public class GraphAnalyzer<E> {
         return toFind;
     }
 
+    /**
+     * Helper method to find an index of a specific based on a string representing
+     * the id.
+     *
+     * @param s - Given string representing an id.
+     * @return An integer representing the index of a vertex.
+     */
     public int findIndex(String s){
         int index = -1;
         for(int i = 0; i < adjList.size(); i++){
@@ -317,6 +465,12 @@ public class GraphAnalyzer<E> {
         return index;
     }
 
+    /**
+     * Helper method that checks if a specific vertex is contained in the adjList.
+     *
+     * @param s - String representing the id of a vertex to check.
+     * @return True if the vertex is contained in the adjList, false if not.
+     */
     public boolean check(String s){
         boolean equal = false;
         for(int i = 0; i < adjList.size(); i++){
@@ -327,12 +481,18 @@ public class GraphAnalyzer<E> {
         return equal;
     }
 
+    /**
+     * Helper method to reset all states of the vertices back to UNVISITED.
+     */
     public void resetStates(){
         for(int i = 0; i < adjList.size(); i++){
             adjList.get(i).get(0).setState("UNVISITED");
         }
     }
 
+    /**
+     * Helper method to initialize all menu states to false.
+     */
     public void initializeMenuValues(){ //set all menu selections to false
         menuOptions.put("1", false);
         menuOptions.put("2", false);
@@ -341,6 +501,9 @@ public class GraphAnalyzer<E> {
         menuOptions.put("5", false);
     }
 
+    /**
+     * Helper method to initialize all menu states to true.
+     */
     public void replaceAllOptions(){ // set all menu selections to true
         menuOptions.replace("1", true);
         menuOptions.replace("2", true);
@@ -349,6 +512,9 @@ public class GraphAnalyzer<E> {
         menuOptions.replace("5", true);
     }
 
+    /**
+     * Helper method to print out our BFS results.
+     */
     public void printBFS(){
         String output = "";
         System.out.print("[BFS Vertices Ordering: " + bfsResults.get(0).getId().toString() + "] ");
@@ -359,6 +525,9 @@ public class GraphAnalyzer<E> {
         System.out.println(output + "\n");
     }
 
+    /**
+     * Helper method to print out our DFS results.
+     */
     public void printDFS(){
         String ordering = "";
         String path = "";
@@ -382,6 +551,9 @@ public class GraphAnalyzer<E> {
 
     }
 
+    /**
+     * Helper method to print our cycle detection results.
+     */
     public void printCycleDetection(){
         System.out.print("[Cycle]: ");
         if(cycle){
@@ -392,6 +564,9 @@ public class GraphAnalyzer<E> {
         }
     }
 
+    /**
+     * Helper method to print our newly added edges results.
+     */
     public void printNewEdges(){
         System.out.print("[TC: New Edges] " + newEdges.get(0) + "\n\t\t\t\t");
         for(int i = 1; i < newEdges.size(); i++){
@@ -400,6 +575,9 @@ public class GraphAnalyzer<E> {
         System.out.println();
     }
 
+    /**
+     * Helper method to prompt the menu options.
+     */
     public void promptMenu(){
         String result = "";
         result += "1) Depth First Search Path Discovery\n" +
@@ -411,6 +589,10 @@ public class GraphAnalyzer<E> {
         System.out.println(result);
     }
 
+    /**
+     * Method that will prompt a user to put the menu options and call the methods that
+     * correspond with user given input.
+     */
     public void prompt(){
         promptMenu();
         Scanner scanner = new Scanner(System.in);
@@ -530,6 +712,10 @@ public class GraphAnalyzer<E> {
 
     }
 
+    /**
+     * Entry point into the program. It builds our list and matrix and prompts the user
+     * for the options until they quit.
+     */
     public void go(){
         System.out.println("Welcome to GraphAnalyzermeister 2023 >>");
         buildList();
