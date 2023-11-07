@@ -12,6 +12,7 @@ public class GraphAnalyzer<E> {
     private int size;
     private ArrayList<Vertex<E>> bfsResults;
     private ArrayList<Vertex<E>> dfsResults;
+    private ArrayList<Vertex<E>> dfsPath;
     private Map<String, Boolean> menuOptions;
     private ArrayList<String> newEdges;
 
@@ -21,6 +22,7 @@ public class GraphAnalyzer<E> {
         this.adjMatrix = null;
         this.bfsResults = new ArrayList<>();
         this.dfsResults = new ArrayList<>();
+        this.dfsPath = new ArrayList<>();
         this.newEdges = new ArrayList<>();
         this.menuOptions = new HashMap<>();
         this.cycle = false;
@@ -61,12 +63,7 @@ public class GraphAnalyzer<E> {
             System.out.println(e.getMessage());
         }
         adjustIndexInList();
-//        printVertices();
         buildMatrix();
-//        System.out.println();
-        printMatrix();
-//        boolean result = findSource("3");
-//        System.out.println(result);
         initializeMenuValues();
     }
 
@@ -110,7 +107,7 @@ public class GraphAnalyzer<E> {
             }
         }
         if(!result){
-            throw new IllegalArgumentException();
+            throw new IllegalArgumentException("Source not found within the graph.");
         }
         return result;
     }
@@ -126,7 +123,7 @@ public class GraphAnalyzer<E> {
             }
         }
         if(!result){
-            throw new IllegalArgumentException();
+            throw new IllegalArgumentException("Destination not found within the graph.");
         }
         return result;
     }
@@ -145,15 +142,94 @@ public class GraphAnalyzer<E> {
             }
             queue.addAll(toAdd);
         }
-        printBFS();
     }
 
     public void depthFirstSearch(String source, String destination){
-
+        dfsPath.clear();
+        dfsResults.clear();
+        resetStates();
+        Stack<Vertex<E>> stack = new Stack<>();
+        ArrayList<Vertex<E>> neighbors;
+        Vertex<E> start = getVertexByID(source);
+        stack.push(start);
+        start.setState("VISITED");
+        dfsResults.add(start);
+        dfsPath.add(start);
+        boolean path = false;
+        while(!stack.isEmpty()){
+            Vertex<E> vertex = stack.peek();
+            neighbors = getNeighbors(vertex);
+            Vertex<E> next = nextNeighbor(neighbors);
+            if(next != null){
+                stack.push(next);
+                next.setState("VISITED");
+                dfsResults.add(next);
+                if(next.getId().toString().equals(destination)){
+                    dfsPath.add(next);
+                    path = true;
+                    break;
+                }
+                else if(!path){
+                    dfsPath.add(next);
+                }
+            }
+            else{
+                stack.pop();
+            }
+            neighbors.clear(); //reset neighbor list
+        }
     }
 
-    public boolean getCycleStatus(){
-        return cycle;
+    public void cycleSearch(String source){
+        Stack<Vertex<E>> stack = new Stack<>();
+        ArrayList<Vertex<E>> neighbors;
+        Vertex<E> start = getVertexByID(source);
+        stack.push(start);
+        while(!stack.isEmpty()){
+            Vertex<E> vertex = stack.peek();
+            neighbors = getNeighbors(vertex);
+            Vertex<E> next = nextNeighbor(neighbors);
+            if(next != null){
+                stack.push(next);
+                next.setState("VISITED");
+            }
+            else{
+                stack.pop();
+            }
+            neighbors.clear(); //reset neighbor list
+        }
+    }
+
+    public Vertex<E> nextNeighbor(ArrayList<Vertex<E>> list){
+        Vertex<E> toReturn = null;
+        int i = 0;
+        while(i < list.size()) {
+            if(list.get(i).getState().equals("UNVISITED")) {
+                toReturn = list.get(i);
+                break; //NEXT NEIGHBOR FOUND
+            }
+            else if(list.get(i).getState().equals("VISITED")){
+                cycle = true;
+            }
+            i++;
+        }
+        return toReturn;
+    }
+
+    public ArrayList<Vertex<E>> getNeighbors(Vertex<E> vertex){
+        ArrayList<Vertex<E>> list = new ArrayList<>();
+        for(int i = 0; i < adjList.size(); i++){
+            if(adjList.get(i).getFirst().getId().equals(vertex.getId())){ //gets correct Vertex to check neighbors
+                if(adjList.get(i).size() > 1){
+                    for(int j = 1; j < adjList.get(i).size(); j++){
+                        E string = adjList.get(i).get(j).getId();
+                        Vertex<E> toAdd = getVertexByID((String)string);
+                        list.add(toAdd);
+                    }
+                }
+            }
+        }
+        return list;
     }
 
     public void transitiveClosure(){
@@ -163,14 +239,23 @@ public class GraphAnalyzer<E> {
                 for(int k = 0; k < size; k++){
                     if((newMatrix[i][j] && newMatrix[k][i])){
                         newMatrix[k][j] = true;
-                        String s = "" + getVertexByID(Integer.toString(i)) + "\t"
-                                + getVertexByID(Integer.toString(k));
-                        newEdges.add(s);
+                        String s = "" + getVertexByID(Integer.toString(k)).getId().toString() + "\t"
+                                + getVertexByID(Integer.toString(i)).getId().toString();
+                        Vertex<E> v1 = getVertexByID(Integer.toString(k));
+                        Vertex<E> v2 = getVertexByID(Integer.toString(i));
+                        boolean inList = false;
+                        for(int h = 1; h < adjList.get(v1.getIndex()).size(); h++){
+                            if(adjList.get(v1.getIndex()).get(h).getId().equals(v2.getId())){
+                                inList = true;
+                            }
+                        }
+                        if(!newEdges.contains(s) && !inList){
+                            newEdges.add(s);
+                        }
                     }
                 }
             }
         }
-        printNewMatrix(newMatrix);
     }
 
     public boolean[][] copyMatrix(){
@@ -181,41 +266,6 @@ public class GraphAnalyzer<E> {
             }
         }
         return newM;
-    }
-    public void printMatrix(){
-        for(int i = 0; i < adjList.size(); i++){
-            if(i == 0){
-                System.out.print("\t");
-            }
-            System.out.print(adjList.get(i).getFirst().getId().toString() + "     ");
-        }
-        System.out.println();
-        for(int i = 0; i < adjMatrix.length; i++){
-            System.out.print(adjList.get(i).getFirst().getId().toString() + " ");
-            for(int j = 0; j < adjMatrix.length; j++){
-                System.out.print(adjMatrix[i][j] + " ");
-            }
-            System.out.println("");
-        }
-        System.out.println();
-    }
-
-    public void printNewMatrix(boolean[][] newM){
-        for(int i = 0; i < adjList.size(); i++){
-            if(i == 0){
-                System.out.print("\t");
-            }
-            System.out.print(adjList.get(i).getFirst().getId().toString() + "     ");
-        }
-        System.out.println();
-        for(int i = 0; i < newM.length; i++){
-            System.out.print(adjList.get(i).getFirst().getId().toString() + " ");
-            for(int j = 0; j < newM.length; j++){
-                System.out.print(newM[i][j] + " ");
-            }
-            System.out.println("");
-        }
-        System.out.println();
     }
 
     public boolean hasVertex(LinkedList<Vertex<E>> list, Vertex<E> vertex){
@@ -277,6 +327,12 @@ public class GraphAnalyzer<E> {
         return equal;
     }
 
+    public void resetStates(){
+        for(int i = 0; i < adjList.size(); i++){
+            adjList.get(i).get(0).setState("UNVISITED");
+        }
+    }
+
     public void initializeMenuValues(){ //set all menu selections to false
         menuOptions.put("1", false);
         menuOptions.put("2", false);
@@ -294,9 +350,54 @@ public class GraphAnalyzer<E> {
     }
 
     public void printBFS(){
+        String output = "";
+        System.out.print("[BFS Vertices Ordering: " + bfsResults.get(0).getId().toString() + "] ");
         for(Vertex <E> v : bfsResults){
-            System.out.println(v.getId());
+            output += "Vertex " + v.getId() + ", ";
         }
+        output = output.substring(0, output.length()-2);
+        System.out.println(output + "\n");
+    }
+
+    public void printDFS(){
+        String ordering = "";
+        String path = "";
+
+        ordering += "[DFS Vertices Ordering: " + dfsResults.get(0).getId().toString() + ", "
+                + dfsResults.get(dfsResults.size()-1).getId().toString() + "] ";
+        for(Vertex<E> v : dfsResults){
+            ordering += "Vertex " + v.getId().toString() + ", ";
+        }
+        ordering = ordering.substring(0, ordering.length()-2);
+
+        path += "[DFS Vertices Path: " + dfsPath.get(0).getId().toString() + ", "
+                + dfsPath.get(dfsPath.size()-1).getId().toString() + "] ";
+        for(Vertex<E> v : dfsPath){
+            path += "Vertex " + v.getId().toString() + " -> ";
+        }
+        path = path.substring(0, path.length()-4);
+
+        System.out.println(ordering + "\n");
+        System.out.println(path + "\n");
+
+    }
+
+    public void printCycleDetection(){
+        System.out.print("[Cycle]: ");
+        if(cycle){
+            System.out.println("Cycle Detected\n");
+        }
+        else{
+            System.out.println("Cycle NOT Detected\n");
+        }
+    }
+
+    public void printNewEdges(){
+        System.out.print("[TC: New Edges] " + newEdges.get(0) + "\n\t\t\t\t");
+        for(int i = 1; i < newEdges.size(); i++){
+            System.out.print(newEdges.get(i) + "\n\t\t\t\t");
+        }
+        System.out.println();
     }
 
     public void promptMenu(){
@@ -346,8 +447,9 @@ public class GraphAnalyzer<E> {
                     System.out.print("Please enter a valid destination vertex >>> ");
                     String dest2 = scanner.next();
                     System.out.println();
-                    if(findSource(src2) && findDestination(dest2)){
+                    if(findSource(src2) && findDestination(dest2) && menuOptions.get("1")){
                         depthFirstSearch(src2, dest2);
+                        cycleSearch(src2);
                         menuOptions.replace("2", true);
                     }
                     else{
@@ -355,7 +457,6 @@ public class GraphAnalyzer<E> {
                     }
                     break;
                 case "3":
-                    //checkForCycles();
                     menuOptions.replace("3", true);
                     break;
                 case "4":
@@ -383,6 +484,7 @@ public class GraphAnalyzer<E> {
                     System.out.println();
                     if(findSource(src4) && findDestination(dest4)){
                         depthFirstSearch(src4, dest4);
+                        cycleSearch(src4);
                         breadthFirstSearch(src4);
                         transitiveClosure();
                         replaceAllOptions();
@@ -394,15 +496,24 @@ public class GraphAnalyzer<E> {
                         if(menuOptions.get(index)){ //checking which options the user selection
                             switch(index){
                                 case "1":
-                                    //printDFS();
+                                    if(menuOptions.get("2")){ //makes sure both results aren't printed
+                                        break;
+                                    }
+                                    printDFS();
+                                    break;
                                 case "2":
-                                    //printDFSWithCycles();
+                                    printDFS();
+                                    printCycleDetection();
+                                    break;
                                 case "3":
-                                    // print cycle detection
+                                    printCycleDetection();
+                                    break;
                                 case "4":
                                     printBFS();
+                                    break;
                                 case "5":
-                                    //printNewEdges();
+                                    printNewEdges();
+                                    break;
                             }
                         }
                     }
